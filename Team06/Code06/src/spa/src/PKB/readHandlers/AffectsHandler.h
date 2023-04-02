@@ -96,14 +96,14 @@ private:
     bool checkCanReach(StmtNum a1, StmtNum a2, ProcName proc, Ent commonVariable);
 
     // cache related data structures and methods
-    std::unordered_map<std::vector<std::string>, bool, hashFunctionIntInt> intIntCache;
-    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> intWildcardCache;
-    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> wildcardIntCache;
-
-    std::unordered_map<std::vector<std::string>, bool, hashFunctionIntInt> intIntTransitiveCache;
-    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> intWildcardTransitiveCache;
-    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> wildcardIntTransitiveCache;
-
-    std::unordered_map<ProcName, std::unordered_map<bool, std::unordered_map<StmtNum, unordered_set<StmtNum>>>>
-        procAffectsGraphMap;
+//    std::unordered_map<std::vector<std::string>, bool, hashFunctionIntInt> intIntCache;
+//    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> intWildcardCache;
+//    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> wildcardIntCache;
+//
+//    std::unordered_map<std::vector<std::string>, bool, hashFunctionIntInt> intIntTransitiveCache;
+//    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> intWildcardTransitiveCache;
+//    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> wildcardIntTransitiveCache;
+//
+//    std::unordered_map<ProcName, std::unordered_map<bool, std::unordered_map<StmtNum, unordered_set<StmtNum>>>>
+//        procAffectsGraphMap;
 };
