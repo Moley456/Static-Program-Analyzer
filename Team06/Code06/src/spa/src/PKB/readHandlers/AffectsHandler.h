@@ -12,24 +12,27 @@ struct hashFunctionTuple {
     int cantor(int a, int b) const {
         return (a + b + 1) * (a + b) / 2 + b;
     }
-    int hashAlgoForTuple(int a, int b, int c) const {
+    int hashAlgoForTuple(int a, int b, int c) const { //todo: delete if unused
         return cantor(a, cantor(b, c));
     }
 
     size_t operator()(const std::tuple<int, int, int>& x) const {
-        return hashAlgoForTuple(get<0>(x), get<1>(x), get<2>(x));
+        return (get<0>(x) << 18) ^ (get<1>(x) << 9) ^ (get<2>(x));
+//        return hashAlgoForTuple(get<0>(x), get<1>(x), get<2>(x));
     }
 };
 
-struct hashFunctionAffectsT {
+struct hashFunctionPair {
     size_t operator()(const std::pair<int, int>& x) const {
-        return (x.first * 501) + x.second;
+        return (x.first << 9) ^ (x.second);
+//        return (x.first * 501) + x.second;
     }
 };
 
 struct hashFunctionIntInt {
     size_t operator()(const std::vector<std::string>& x) const {
-        return (stoi(x[0]) * 501) + stoi(x[1]);
+        return (stoi(x[0]) << 9) ^ (stoi(x[1]));
+//        return (stoi(x[0]) * 501) + stoi(x[1]);
     }
 };
 
@@ -96,14 +99,14 @@ private:
     bool checkCanReach(StmtNum a1, StmtNum a2, ProcName proc, Ent commonVariable);
 
     // cache related data structures and methods
-//    std::unordered_map<std::vector<std::string>, bool, hashFunctionIntInt> intIntCache;
-//    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> intWildcardCache;
-//    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> wildcardIntCache;
-//
-//    std::unordered_map<std::vector<std::string>, bool, hashFunctionIntInt> intIntTransitiveCache;
-//    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> intWildcardTransitiveCache;
-//    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> wildcardIntTransitiveCache;
-//
-//    std::unordered_map<ProcName, std::unordered_map<bool, std::unordered_map<StmtNum, unordered_set<StmtNum>>>>
-//        procAffectsGraphMap;
+    std::unordered_map<std::vector<std::string>, bool, hashFunctionIntInt> intIntCache;
+    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> intWildcardCache;
+    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> wildcardIntCache;
+
+    std::unordered_map<std::vector<std::string>, bool, hashFunctionIntInt> intIntTransitiveCache;
+    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> intWildcardTransitiveCache;
+    std::unordered_map<StmtNum, std::vector<std::vector<std::string>>> wildcardIntTransitiveCache;
+
+    std::unordered_map<ProcName, std::unordered_map<bool, std::unordered_map<StmtNum, unordered_set<StmtNum>>>>
+        procAffectsGraphMap;
 };

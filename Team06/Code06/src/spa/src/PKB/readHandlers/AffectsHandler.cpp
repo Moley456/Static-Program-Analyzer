@@ -52,27 +52,27 @@ std::vector<std::vector<std::string>> AffectsHandler::handleIntInt(StmtNum a1, S
     std::string paramString2 = std::to_string(a2);
 
     std::vector<std::string> val = {paramString1, paramString2};
-//    if (intIntCache.find(val) != intIntCache.end() &&
-//        intIntCache[val]) {
-//        return {val};
-//    }
+    if (intIntCache.find(val) != intIntCache.end() &&
+        intIntCache[val]) {
+        return {val};
+    }
 
     ProcName proc1 = procStorage->getProcedure(a1);
     ProcName proc2 = procStorage->getProcedure(a2);
 
     // either not in any procedure, or both are not in the same procedure
     if (proc1 == AppConstants::PROCEDURE_DOES_NOT_EXIST || proc2 == AppConstants::PROCEDURE_DOES_NOT_EXIST) {
-//        intIntCache[val] = false;
+        intIntCache[val] = false;
         return {};
     }
     else if (proc1 != proc2) {
-//        intIntCache[val] = false;
+        intIntCache[val] = false;
         return {};
     }
 
     // if both are not assign statements, should also just return nothing already
     if (!procAssignStmtStorage->checkProcedure(proc1, a1) || !procAssignStmtStorage->checkProcedure(proc1, a2)) {
-//        intIntCache[val] = false;
+        intIntCache[val] = false;
         return {};
     }
 
@@ -80,39 +80,37 @@ std::vector<std::vector<std::string>> AffectsHandler::handleIntInt(StmtNum a1, S
     std::unordered_set<Ent> variablesUsedInA2 = usesStorage->getRightItems(a2);
     Ent commonVariable = getCommonVariable(variablesModifiedInA1, variablesUsedInA2);
     if (commonVariable == "") {
-//        intIntCache[val] = false;
+        intIntCache[val] = false;
         return {};
     }
 
     bool canReach = checkCanReach(a1, a2, proc1, commonVariable);
     if (!canReach) {
-//        intIntCache[val] = false;
+        intIntCache[val] = false;
         return {};
     }
 
-//    intIntCache[val] = true;
+    intIntCache[val] = true;
     std::vector<std::vector<std::string>> res = {val};
     return res;
 }
 
 std::vector<std::vector<std::string>> AffectsHandler::handleWildcardInt(StmtNum a2) {
-//    if (wildcardIntCache.find(a2) != wildcardIntCache.end()) {
-//        return wildcardIntCache[a2];
-//    }
-//
-//    wildcardIntCache[a2] = nonTransitiveOneIntOneWildcard(AppConstants::NOT_USED_FIELD, a2);
-//    return wildcardIntCache[a2];
-    return nonTransitiveOneIntOneWildcard(AppConstants::NOT_USED_FIELD, a2);
+    if (wildcardIntCache.find(a2) != wildcardIntCache.end()) {
+        return wildcardIntCache[a2];
+    }
+
+    wildcardIntCache[a2] = nonTransitiveOneIntOneWildcard(AppConstants::NOT_USED_FIELD, a2);
+    return wildcardIntCache[a2];
 }
 
 std::vector<std::vector<std::string>> AffectsHandler::handleIntWildcard(StmtNum a1) {
-//    if (intWildcardCache.find(a1) != intWildcardCache.end()) {
-//        return intWildcardCache[a1];
-//    }
-//
-//    intWildcardCache[a1] = nonTransitiveOneIntOneWildcard(a1, AppConstants::NOT_USED_FIELD);
-//    return intWildcardCache[a1];
-    return nonTransitiveOneIntOneWildcard(a1, AppConstants::NOT_USED_FIELD);
+    if (intWildcardCache.find(a1) != intWildcardCache.end()) {
+        return intWildcardCache[a1];
+    }
+
+    intWildcardCache[a1] = nonTransitiveOneIntOneWildcard(a1, AppConstants::NOT_USED_FIELD);
+    return intWildcardCache[a1];
 }
 
 // todo: change to short-circuit code. BUT WE NEED TO KEEP THIS. change this to some other name since it is currently used for other calls eg Affects*(int, _)
@@ -138,7 +136,7 @@ std::vector<std::vector<std::string>> AffectsHandler::handleWildcardWildcard(Pro
                 res.push_back(val);
 
                 StmtNum a2 = std::stoi(val[1]);
-//                wildcardIntCache[a2].push_back(val);
+                wildcardIntCache[a2].push_back(val);
             }
         }
     }
@@ -152,26 +150,26 @@ std::vector<std::vector<std::string>> AffectsHandler::handleIntIntTransitive(Stm
     std::string paramString2 = std::to_string(a2);
 
     std::vector<std::string> val = {paramString1, paramString2};
-//    if (intIntTransitiveCache.find(val) != intIntTransitiveCache.end() &&
-//            intIntTransitiveCache[val]) {
-//        return {val};
-//    }
+    if (intIntTransitiveCache.find(val) != intIntTransitiveCache.end() &&
+            intIntTransitiveCache[val]) {
+        return {val};
+    }
 
     ProcName proc1 = procStorage->getProcedure(a1);
     ProcName proc2 = procStorage->getProcedure(a2);
     std::vector<std::vector<std::string>> res;
 
     if (proc1 == AppConstants::PROCEDURE_DOES_NOT_EXIST || proc2 == AppConstants::PROCEDURE_DOES_NOT_EXIST) {
-//        intIntTransitiveCache[val] = false;
+        intIntTransitiveCache[val] = false;
         return res;
     }
     else if (proc1 != proc2) {
-//        intIntTransitiveCache[val] = false;
+        intIntTransitiveCache[val] = false;
         return res;
     }
 
     std::unordered_map<StmtNum, unordered_set<StmtNum>> hashmap = buildAffectsGraph(false, proc1);
-    std::unordered_set<std::pair<StmtNum, StmtNum>, hashFunctionAffectsT> seen;
+    std::unordered_set<std::pair<StmtNum, StmtNum>, hashFunctionPair> seen;
     std::deque<std::pair<StmtNum, StmtNum>> queue;
     for (StmtNum num : hashmap[a1]) {
         queue.push_back({a1, num});
@@ -184,7 +182,7 @@ std::vector<std::vector<std::string>> AffectsHandler::handleIntIntTransitive(Stm
 
         if (curr.second == a2) {
             std::vector<std::string> tempVal = {std::to_string(a1), std::to_string(a2)};
-//            intIntTransitiveCache[tempVal] = true;
+            intIntTransitiveCache[tempVal] = true;
 
             res.push_back(tempVal);
             return res;
@@ -199,12 +197,12 @@ std::vector<std::vector<std::string>> AffectsHandler::handleIntIntTransitive(Stm
             queue.push_front({curr.second, num});
 
             std::vector<std::string> tempVal = {std::to_string(a1), std::to_string(num)};
-//            intIntTransitiveCache[tempVal] = true;
+            intIntTransitiveCache[tempVal] = true;
         }
     }
 
     std::vector<std::string> tempVal = {std::to_string(a1), std::to_string(a2)};
-//    intIntTransitiveCache[tempVal] = false;
+    intIntTransitiveCache[tempVal] = false;
     return res;
 }
 
@@ -214,13 +212,12 @@ std::vector<std::vector<std::string>> AffectsHandler::handleIntWildcardTransitiv
         return {};
     }
 
-//    if (intWildcardTransitiveCache.find(a1) != intWildcardTransitiveCache.end()) {
-//        return intWildcardTransitiveCache[a1];
-//    }
-//
-//    intWildcardTransitiveCache[a1] = bfsTraversalOneWildcard(a1, AppConstants::NOT_USED_FIELD);
-//    return intWildcardTransitiveCache[a1];
-    return bfsTraversalOneWildcard(a1, AppConstants::NOT_USED_FIELD);
+    if (intWildcardTransitiveCache.find(a1) != intWildcardTransitiveCache.end()) {
+        return intWildcardTransitiveCache[a1];
+    }
+
+    intWildcardTransitiveCache[a1] = bfsTraversalOneWildcard(a1, AppConstants::NOT_USED_FIELD);
+    return intWildcardTransitiveCache[a1];
 }
 
 std::vector<std::vector<std::string>> AffectsHandler::handleWildcardIntTransitive(StmtNum a2) {
@@ -229,13 +226,12 @@ std::vector<std::vector<std::string>> AffectsHandler::handleWildcardIntTransitiv
         return {};
     }
 
-//    if (wildcardIntTransitiveCache.find(a2) != wildcardIntTransitiveCache.end()) {
-//        return wildcardIntTransitiveCache[a2];
-//    }
-//
-//    wildcardIntTransitiveCache[a2] = bfsTraversalOneWildcard(AppConstants::NOT_USED_FIELD, a2);
-//    return wildcardIntTransitiveCache[a2];
-    return bfsTraversalOneWildcard(AppConstants::NOT_USED_FIELD, a2);
+    if (wildcardIntTransitiveCache.find(a2) != wildcardIntTransitiveCache.end()) {
+        return wildcardIntTransitiveCache[a2];
+    }
+
+    wildcardIntTransitiveCache[a2] = bfsTraversalOneWildcard(AppConstants::NOT_USED_FIELD, a2);
+    return wildcardIntTransitiveCache[a2];
 }
 
 std::vector<std::vector<std::string>> AffectsHandler::handleWildcardWildcardTransitive() {
@@ -271,8 +267,9 @@ std::vector<std::vector<std::string>> AffectsHandler::handleWildcardWildcardTran
         }
     }
 
+    //todo: delete? if QPS already handles this
     // remove duplicates
-    std::unordered_set<std::pair<StmtNum, StmtNum>, hashFunctionAffectsT> temp;
+    std::unordered_set<std::pair<StmtNum, StmtNum>, hashFunctionPair> temp;
     for (const std::tuple<StmtNum, StmtNum, StmtNum>& curr : seen) {
         temp.insert({get<0>(curr), get<2>(curr)});
     }
@@ -281,8 +278,8 @@ std::vector<std::vector<std::string>> AffectsHandler::handleWildcardWildcardTran
         std::vector<std::string> val = {std::to_string(p.first), std::to_string(p.second)};
         res.push_back(val);
 
-//        intWildcardTransitiveCache[p.first].push_back(val);
-//        wildcardIntTransitiveCache[p.second].push_back(val);
+        intWildcardTransitiveCache[p.first].push_back(val);
+        wildcardIntTransitiveCache[p.second].push_back(val);
     }
     return res;
 }
@@ -346,10 +343,10 @@ std::vector<std::vector<std::string>> AffectsHandler::handleTransitive(std::stri
 
 std::unordered_map<StmtNum, unordered_set<StmtNum>> AffectsHandler::buildAffectsGraph(bool isInverted, ProcName proc) {
 
-//    if (procAffectsGraphMap.find(proc) != procAffectsGraphMap.end() &&
-//        procAffectsGraphMap[proc].find(isInverted) != procAffectsGraphMap[proc].end()) {
-//        return procAffectsGraphMap[proc][isInverted];
-//    }
+    if (procAffectsGraphMap.find(proc) != procAffectsGraphMap.end() &&
+        procAffectsGraphMap[proc].find(isInverted) != procAffectsGraphMap[proc].end()) {
+        return procAffectsGraphMap[proc][isInverted];
+    }
 
     // build the hop graph
     std::vector<std::vector<std::string>> allValidAffects = handleWildcardWildcard(proc);
@@ -358,8 +355,8 @@ std::unordered_map<StmtNum, unordered_set<StmtNum>> AffectsHandler::buildAffects
         isInverted ? hashmap[stoi(p[1])].insert(stoi(p[0])) : hashmap[stoi(p[0])].insert(stoi(p[1]));
     }
 
-//    procAffectsGraphMap[proc][isInverted] = hashmap;
-//    return procAffectsGraphMap[proc][isInverted];
+    procAffectsGraphMap[proc][isInverted] = hashmap;
+    return procAffectsGraphMap[proc][isInverted];
     return hashmap;
 }
 
@@ -367,7 +364,7 @@ std::vector<std::vector<std::string>> AffectsHandler::bfsTraversalOneWildcard(St
     bool isIntWildcard = a2 == AppConstants::NOT_USED_FIELD;
     ProcName proc = isIntWildcard ? procStorage->getProcedure(a1) : procStorage->getProcedure(a2);
     std::unordered_map<StmtNum, unordered_set<StmtNum>> hashmap = buildAffectsGraph(!isIntWildcard, proc);
-    std::unordered_set<std::pair<StmtNum, StmtNum>, hashFunctionAffectsT> seen;
+    std::unordered_set<std::pair<StmtNum, StmtNum>, hashFunctionPair> seen;
     std::deque<std::pair<StmtNum, StmtNum>> queue;
 
     // add from initial starting node
@@ -396,7 +393,7 @@ std::vector<std::vector<std::string>> AffectsHandler::bfsTraversalOneWildcard(St
     }
 
     // remove potential duplicate entries
-    std::unordered_set<std::pair<StmtNum, StmtNum>, hashFunctionAffectsT> temp;
+    std::unordered_set<std::pair<StmtNum, StmtNum>, hashFunctionPair> temp;
     for (const std::pair<StmtNum, StmtNum>& p : seen) {
         isIntWildcard ? temp.insert({a1, p.second}) : temp.insert({p.first, a2});
     }
@@ -408,9 +405,9 @@ std::vector<std::vector<std::string>> AffectsHandler::bfsTraversalOneWildcard(St
                       : res.push_back({std::to_string(p.first), paramString});
     }
 
-//    for (std::vector<std::string> val : res) {
-//        intIntTransitiveCache[val] = true;
-//    }
+    for (std::vector<std::string> val : res) {
+        intIntTransitiveCache[val] = true;
+    }
 
     return res;
 }
@@ -445,7 +442,7 @@ std::vector<std::vector<std::string>> AffectsHandler::nonTransitiveOneIntOneWild
             std::vector<std::string> val;
             isIntWildcard ? val = {paramString, std::to_string(otherA)} : val = {std::to_string(otherA), paramString};
             res.push_back(val);
-//            intIntCache[val] = true;
+            intIntCache[val] = true;
         }
     }
 
@@ -483,7 +480,7 @@ bool AffectsHandler::checkCanReach(StmtNum a1, StmtNum a2, ProcName proc, Ent co
     }
 
     std::deque<std::pair<StmtNum, StmtNum>> queue;
-    std::unordered_set<std::pair<StmtNum, StmtNum>, hashFunctionAffectsT> seen;
+    std::unordered_set<std::pair<StmtNum, StmtNum>, hashFunctionPair> seen;
     const auto& graph = cfgStorage->getGraph(proc);
 
     // curr.first is the previous node.
@@ -523,12 +520,12 @@ bool AffectsHandler::checkCanReach(StmtNum a1, StmtNum a2, ProcName proc, Ent co
 }
 
 void AffectsHandler::clearCache() {
-//    intIntCache.clear();
-//    intWildcardCache.clear();
-//    wildcardIntCache.clear();
-//
-//    intIntTransitiveCache.clear();
-//    intWildcardTransitiveCache.clear();
-//    wildcardIntTransitiveCache.clear();
-//    procAffectsGraphMap.clear();
+    intIntCache.clear();
+    intWildcardCache.clear();
+    wildcardIntCache.clear();
+
+    intIntTransitiveCache.clear();
+    intWildcardTransitiveCache.clear();
+    wildcardIntTransitiveCache.clear();
+    procAffectsGraphMap.clear();
 }
